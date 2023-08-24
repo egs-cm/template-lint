@@ -12,7 +12,7 @@ export class Reflection {
   private pathMappings: [RegExp, string][] = [];
 
   addGlob(pattern?: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       try {
         if (pattern) {
           glob(pattern, {}, (er, files) => {
@@ -34,7 +34,7 @@ export class Reflection {
   }
 
   addTypingsGlob(pattern?: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       try {
         if (pattern) {
           glob(pattern, {}, (er, files) => {
