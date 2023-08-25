@@ -21,8 +21,8 @@ describe("Abstract Syntax Tree", () => {
 
   it("inheritLocals returns deepest duplicate-name locals", () => {
 
-    let a = new ASTNode({ locals: [new ASTContext({ name: "item", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.NumberKeyword) })] });
-    let b = new ASTNode({ locals: [new ASTContext({ name: "item", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.StringKeyword) })] });
+    let a = new ASTNode({ locals: [new ASTContext({ name: "item", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.NumberKeyword) })] });
+    let b = new ASTNode({ locals: [new ASTContext({ name: "item", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.StringKeyword) })] });
 
     a.addChild(b);
 
@@ -30,7 +30,7 @@ describe("Abstract Syntax Tree", () => {
 
     expect(locals.length).toBe(1);
     expect(locals[0].name).toBe("item");
-    expect(locals[0].type).toEqual(<ts.TypeNode>ts.createNode(ts.SyntaxKind.StringKeyword));
+    expect(locals[0].type).toEqual(<ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.StringKeyword));
   });
   it("will create correct AST when void present", (done) => {
     var builder = new ASTBuilder();

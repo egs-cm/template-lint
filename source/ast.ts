@@ -13,7 +13,7 @@ import {
   ViewFactory
 }
   from 'aurelia-templating';
-import { ASTAttribute as P5ASTAttribute } from "parse5";
+import { Token } from "parse5";
 
 import { AureliaReflection } from './aurelia-reflection';
 
@@ -35,7 +35,7 @@ export class ASTBuilder extends Rule {
       next.tag = tag;
       next.parent = current;
       next.location = new FileLoc(loc.line, loc.col);
-      next.attrs = attrs.map((x: P5ASTAttribute, i) => {
+      next.attrs = attrs.map((x: Token.Attribute, i) => {
         var attr = new ASTAttribute();
         attr.name = (x.prefix !== undefined && x.prefix != "") ? `${x.prefix}:${x.name}` : x.name;
         var attrLoc = loc.attrs[attr.name] || loc.attrs[attr.name.toLowerCase()];

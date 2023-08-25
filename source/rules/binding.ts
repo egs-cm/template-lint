@@ -157,7 +157,7 @@ export class BindingRule extends ASTBuilder {
 
           var root = this.resolveRoot(node);
 
-          root.locals.push(new ASTContext({ name: name, type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.AnyKeyword) }));
+          root.locals.push(new ASTContext({ name: name, type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.AnyKeyword) }));
         }
         this.examineNameExpression(node, <NameExpression>instruction);
 
@@ -187,18 +187,18 @@ export class BindingRule extends ASTBuilder {
         let typeDecl = resolved ? resolved.typeDecl : null;
 
         if (varKey && varValue) {
-          node.locals.push(new ASTContext({ name: varKey, type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.StringKeyword) }));
+          node.locals.push(new ASTContext({ name: varKey, type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.StringKeyword) }));
           node.locals.push(new ASTContext({ name: varValue, type: type, typeDecl: typeDecl }));
         }
         else {
           node.locals.push(new ASTContext({ name: varLocal, type: type, typeDecl: typeDecl }));
         }
 
-        node.locals.push(new ASTContext({ name: "$index", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.NumberKeyword) }));
-        node.locals.push(new ASTContext({ name: "$first", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$last", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$odd", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$even", type: <ts.TypeNode>ts.createNode(ts.SyntaxKind.BooleanKeyword) }));
+        node.locals.push(new ASTContext({ name: "$index", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.NumberKeyword) }));
+        node.locals.push(new ASTContext({ name: "$first", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
+        node.locals.push(new ASTContext({ name: "$last", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
+        node.locals.push(new ASTContext({ name: "$odd", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
+        node.locals.push(new ASTContext({ name: "$even", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
 
         break;
       }
@@ -305,14 +305,18 @@ export class BindingRule extends ASTBuilder {
       return null;
     }
 
-    let classes = viewModelSource.statements.filter(
-      x =>
-        x.kind == ts.SyntaxKind.ClassDeclaration &&
-        x.modifiers !== undefined &&
-        x.modifiers.some(
-          modifier => modifier.kind === ts.SyntaxKind.ExportKeyword
-        )
-    ) as ts.ClassDeclaration[];
+    let classes = viewModelSource.statements
+      .filter(
+        (x): x is ts.ClassDeclaration =>
+          x.kind == ts.SyntaxKind.ClassDeclaration
+      )
+      .filter(
+        (x) =>
+          x.modifiers !== undefined &&
+          x.modifiers.some(
+            (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+          )
+      );
 
     if (classes == null || classes.length == 0) {
       if (this.reportUnresolvedViewModel) {
@@ -684,6 +688,6 @@ export class BindingRule extends ASTBuilder {
 }
 
 function hasModifier(node: ts.ParameterDeclaration | ts.ClassElement | ts.TypeElement, mod: ts.ModifierFlags): 0 | 1 {
-  if (node.modifiers === undefined) return 0;
+  if (!("modifiers" in node)) return 0;
   return (ts.getCombinedModifierFlags(node) & mod) === mod ? 1 : 0;
 }

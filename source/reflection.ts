@@ -1,6 +1,6 @@
 import * as Path from "path";
 import * as ts from "typescript";
-import * as glob from "glob";
+import { glob } from "glob";
 import * as fs from "fs";
 
 /*
@@ -12,46 +12,28 @@ export class Reflection {
   private pathMappings: [RegExp, string][] = [];
 
   addGlob(pattern?: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      try {
-        if (pattern) {
-          glob(pattern, {}, (er, files) => {
-            if (er)
-              reject(er);
+    if (!pattern) {
+      return;
+    }
 
-            files.forEach(path => {
-              let source = fs.readFileSync(path, "utf8");
-              this.add(path, source);
-            });
-
-            resolve();
-          });
-        }
-      } catch (err) {
-        reject(err);
-      }
+    return glob(pattern, {}).then((files) => {
+      files.forEach((path) => {
+        let source = fs.readFileSync(path, "utf8");
+        this.add(path, source);
+      });
     });
   }
 
   addTypingsGlob(pattern?: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      try {
-        if (pattern) {
-          glob(pattern, {}, (er, files) => {
-            if (er)
-              reject(er);
+    if (!pattern) {
+      return;
+    }
 
-            files.forEach(path => {
-              let source = fs.readFileSync(path, "utf8");
-              this.addTypings(source);
-            });
-
-            resolve();
-          });
-        }
-      } catch (err) {
-        reject(err);
-      }
+    return glob(pattern, {}).then((files) => {
+      files.forEach((path) => {
+        let source = fs.readFileSync(path, "utf8");
+        this.addTypings(source);
+      });
     });
   }
 
