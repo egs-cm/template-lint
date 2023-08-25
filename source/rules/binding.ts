@@ -444,7 +444,7 @@ export class BindingRule extends ASTBuilder {
             x.kind == ts.SyntaxKind.MethodDeclaration ||
             x.kind == ts.SyntaxKind.GetAccessor)
           .sort((a, b) => hasModifier(a, ts.ModifierFlags.Static) - hasModifier(b, ts.ModifierFlags.Static))
-          .find(x => (<any>x.name).text == memberName);
+          .find(x => x.name?.getText() == memberName);
 
         if (member) {
           /* 
