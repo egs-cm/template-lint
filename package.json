@@ -29,7 +29,6 @@
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "devDependencies": {
-    "@types/glob": "^5.0.29",
     "@types/jasmine": "^2.8.19",
     "jasmine": "^2.99.0",
     "rimraf": "^5.0.1",
@@ -51,7 +50,7 @@
     "aurelia-polyfills": "^1.0.0",
     "aurelia-templating": "^1.0.0",
     "aurelia-templating-binding": "^1.0.0",
-    "glob": "7.0.x",
+    "glob": "^10.3.3",
     "parse5": "2.2.x",
     "template-lint": "0.8.x",
     "typescript": "^5.1.6"
