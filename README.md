@@ -196,7 +196,6 @@ export class Config {
     /**
     * Aurelia Binding Access Options
     * localProvidors: list of attributes that generate local variables
-    * debugReportExceptions: when true, any caught exceptions are reported as rule issues. 
     * restrictedAccess: access to type members with these modifiers will report an issue;
     */
     aureliaBindingAccessOpts = {
