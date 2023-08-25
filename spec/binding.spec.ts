@@ -252,6 +252,25 @@ describe("Static-Type Binding Tests", () => {
       });
   });
 
+  it("rejects bad interpolation binding in class with constructor", async () => {
+    let viewmodel = `
+    export class Foo{
+      constructor() {}
+    }`;
+    let view = `
+    <template>
+      \${nam}
+    </template>`;
+    let reflection = new Reflection();
+    let rule = new BindingRule(reflection, new AureliaReflection());
+    let linter = new Linter([rule]);
+    reflection.add("./foo.ts", viewmodel);
+    const results = await linter.lint(view, "./foo.html");
+    expect(results.length).toBe(1);
+    expect(results[0].message).toBe("cannot find 'nam' in type 'Foo'");
+  });
+
+
   it("accepts good if.bind", (done) => {
     let viewmodel = `
     export class Foo{
