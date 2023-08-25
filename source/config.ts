@@ -129,7 +129,6 @@ export class Config {
   /**
   * Aurelia Binding Access Options
   * localProvidors: list of attributes that generate local variables
-  * debugReportExceptions: when true, any caught exceptions are reported as rule issues. 
   * restrictedAccess: access to type members with these modifiers will report an issue;
   */
   aureliaBindingAccessOpts = {
@@ -177,11 +176,6 @@ export class Config {
     typingsFileGlob: "typings/**/*.d.ts",
     pathMappings: [],
   };
-
-  /**
-   * report exceptions as issues, where applicable 
-   */
-  debug = false;
 
   /**
    * Append the linter rule-set with these rules

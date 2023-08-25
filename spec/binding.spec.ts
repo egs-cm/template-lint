@@ -755,7 +755,7 @@ describe("Static-Type Binding Tests", () => {
       \${missing}
     </template>`;
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
     reflection.add("./path/foo.ts", viewmodel);
     reflection.addTypings(lib);
@@ -794,7 +794,7 @@ describe("Static-Type Binding Tests", () => {
       </div>
     </template>`;
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
 
     reflection.add("./path/item.ts", item);
@@ -837,7 +837,7 @@ describe("Static-Type Binding Tests", () => {
       </div>
     </template>`;
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
 
     reflection.add("./path/item.ts", item);
@@ -969,7 +969,7 @@ describe("Static-Type Binding Tests", () => {
       \${c.dynamic4}
     </template>`;
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
     reflection.add("./path/foo.ts", viewmodel);
     linter.lint(view, "./path/foo.html")
@@ -1322,7 +1322,7 @@ describe("Static-Type Binding Tests", () => {
     </template>`;
 
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
     reflection.add("./page.ts", pageViewModel);
     linter.lint(pageView, "./page.html")
@@ -1350,7 +1350,7 @@ describe("Static-Type Binding Tests", () => {
       \${missing}
     </template>`;
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
     reflection.add("./path/foo.ts", viewmodel);
     linter.lint(view, "./path/foo.html")
@@ -1377,7 +1377,7 @@ describe("Static-Type Binding Tests", () => {
       </svg>
     </template>`;
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
     reflection.add("./path/foo.ts", viewmodel);
     linter.lint(view, "./path/foo.html")
@@ -1402,7 +1402,7 @@ describe("Static-Type Binding Tests", () => {
     `;
 
     let reflection = new Reflection();
-    let rule = new BindingRule(reflection, new AureliaReflection(), { reportExceptions: true });
+    let rule = new BindingRule(reflection, new AureliaReflection());
     let linter = new Linter([rule]);
 
     try {

@@ -32,7 +32,6 @@ import Identifier = ts.Identifier;
  */
 export class BindingRule extends ASTBuilder {
   public reportBindingAccess = true;
-  public reportExceptions = false;
   public reportUnresolvedViewModel = false;
 
   public localProvidors = ["ref", "repeat.for", "if.bind", "with.bind"];
@@ -46,7 +45,6 @@ export class BindingRule extends ASTBuilder {
       reportBindingSyntax?: boolean,
       reportBindingAccess?: boolean,
       reportUnresolvedViewModel?: boolean,
-      reportExceptions?: boolean,
       localProvidors?: string[],
       localOverride?: Map<string, Array<{ name: string, typeValue: any }>>
       restrictedAccess?: string[]
@@ -69,8 +67,7 @@ export class BindingRule extends ASTBuilder {
         if (this.root.context != null)
           this.examineNode(this.root);
       } catch (error) {
-        if (this.reportExceptions)
-          this.reportIssue(new Issue({ message: error, line: -1, column: -1 }));
+        this.reportIssue(new Issue({ message: error, line: -1, column: -1 }));
       }
     }
     return super.finalise();
@@ -164,8 +161,7 @@ export class BindingRule extends ASTBuilder {
         break;
       }
       default: {
-        if (this.reportExceptions)
-          this.reportIssue(new Issue({ message: `Unknown instruction type: ${instructionName}`, line: attr.location.line }));
+        this.reportIssue(new Issue({ message: `Unknown instruction type: ${instructionName}`, line: attr.location.line }));
       }
     }
   }
