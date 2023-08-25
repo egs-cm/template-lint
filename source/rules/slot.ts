@@ -2,18 +2,18 @@
 "use strict";
 
 import { Rule, Parser, Issue, IssueSeverity } from 'template-lint';
-import { Attribute, StartTagLocationInfo } from 'parse5';
+import { Token } from 'parse5';
 
 /**
  *  Rule to ensure root element is the template element
  */
 export class SlotRule extends Rule {
   controllers: string[];
-  slots: Array<{ name: string, loc: StartTagLocationInfo }>;
+  slots: Array<{ name: string, loc: Token.Location }>;
 
   constructor(controllers?: string[]) {
     super();
-    this.slots = new Array<{ name: string, loc: StartTagLocationInfo }>();
+    this.slots = new Array<{ name: string, loc: Token.Location }>();
     this.controllers = controllers || ["repeat.for", "if.bind", "with.bind"];
   }
 
@@ -28,7 +28,10 @@ export class SlotRule extends Rule {
         if (nameIndex >= 0)
           name = attrs[nameIndex].value;
 
-        this.slots.push({ name: name, loc: loc });
+        this.slots.push({
+          name: name,
+          loc: { startLine: loc.line, endLine: loc.line, startCol: loc.col, endCol: loc.col, ...loc },
+        });
 
         for (let i = stack.length - 1; i >= 0; i--) {
           let result = stack[i].attrs.find(x => this.controllers.indexOf(x.name) != -1);
@@ -65,8 +68,8 @@ export class SlotRule extends Rule {
 
         let error = new Issue({
           message: errorStr,
-          line: slot.loc.line,
-          column: slot.loc.col
+          line: slot.loc.startLine,
+          column: slot.loc.startCol
         });
 
         this.reportIssue(error);

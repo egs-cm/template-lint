@@ -43,7 +43,6 @@
   },
   "dependencies": {
     "@types/node": "^16.18.44",
-    "@types/parse5": "0.0.30",
     "aurelia-binding": "^1.0.0",
     "aurelia-dependency-injection": "^1.0.0",
     "aurelia-pal-nodejs": "^1.0.0-alpha.4",
@@ -51,7 +50,7 @@
     "aurelia-templating": "^1.0.0",
     "aurelia-templating-binding": "^1.0.0",
     "glob": "^10.3.3",
-    "parse5": "2.2.x",
+    "parse5": "^7.1.2",
     "template-lint": "0.8.x",
     "typescript": "^5.1.6"
   }
