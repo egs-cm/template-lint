@@ -111,7 +111,6 @@ export class Reflection {
     if (!source || !typeName) return null;
 
     let exports = source.statements.filter(x => x.kind == ts.SyntaxKind.ExportDeclaration);
-    let map: { [id: string]: ts.SourceFile } = {};
     let symbolExportDecl = exports.find(x => {
       if (!(<any>x).exportClause) {
         return true;  // export * from "module"
@@ -123,8 +122,6 @@ export class Reflection {
       if (!exportSymbols) {
         return false;
       }
-
-      let importModule = (<any>x).moduleSpecifier.text;
 
       let isMatch = exportSymbols.findIndex(exportSymbol => {
         return exportSymbol.name.text == typeName;
@@ -159,7 +156,6 @@ export class Reflection {
     typeName = typeName.split("<")[0]; //remove Generic types variable part when read imports declarations
     
     let imports = source.statements.filter(x => x.kind == ts.SyntaxKind.ImportDeclaration);
-    let map: { [id: string]: ts.SourceFile } = {};
     let symbolImportDecl = imports.find(x => {
       if (!(<any>x).importClause) {
         return false;  // smth like `import "module-name"`
@@ -172,8 +168,6 @@ export class Reflection {
       if (!importSymbols) {
         return false; // smth like `import * as name from "module-name"`
       }
-      let importModule = (<any>x).moduleSpecifier.text;
-
       let isMatch = importSymbols.findIndex(importSymbol => {
         return importSymbol.name.text == typeName;
       });
