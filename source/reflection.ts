@@ -41,7 +41,7 @@ export class Reflection {
     this.pathMappings = pathMappings;
   }
 
-  add(path: string, source: string) {
+  add(path: string, source: string): ts.SourceFile {
 
     let parsed = Path.parse(Path.normalize(path));
     let moduleName = Path.join(parsed.dir, parsed.name);
@@ -52,6 +52,8 @@ export class Reflection {
     let reflection = ts.createSourceFile(moduleName, source, ts.ScriptTarget.Latest, true);
     this.sourceFiles.push(reflection);
     this.pathToSource[moduleName] = reflection;
+
+    return reflection;
   }
 
   addTypings(source: string) {
