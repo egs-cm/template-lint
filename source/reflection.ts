@@ -110,9 +110,12 @@ export class Reflection {
   getDeclForTypeFromExports(source: ts.SourceFile, typeName: string): ts.DeclarationStatement {
     if (!source || !typeName) return null;
 
-    let exports = source.statements.filter(x => x.kind == ts.SyntaxKind.ExportDeclaration);
+    let exports = source.statements.filter(
+      (x): x is ts.ExportDeclaration =>
+        x.kind == ts.SyntaxKind.ExportDeclaration
+    );
     let symbolExportDecl = exports.find(x => {
-      if (!(<any>x).exportClause) {
+      if (!x.exportClause) {
         return true;  // export * from "module"
       }
 
@@ -155,9 +158,12 @@ export class Reflection {
     
     typeName = typeName.split("<")[0]; //remove Generic types variable part when read imports declarations
     
-    let imports = source.statements.filter(x => x.kind == ts.SyntaxKind.ImportDeclaration);
+    let imports = source.statements.filter(
+      (x): x is ts.ImportDeclaration =>
+        x.kind == ts.SyntaxKind.ImportDeclaration
+    );
     let symbolImportDecl = imports.find(x => {
-      if (!(<any>x).importClause) {
+      if (!x.importClause) {
         return false;  // smth like `import "module-name"`
       }
       const namedBindings = (<any>x).importClause.namedBindings;
