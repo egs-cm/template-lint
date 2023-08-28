@@ -264,6 +264,8 @@ export class Reflection {
   }
 
   private getSource(moduleName: string): ts.SourceFile {
-    return this.pathToSource[moduleName];
+    return (
+      this.pathToSource[moduleName] ?? this.pathToSource[`${moduleName}/index`]
+    );
   }
 }
