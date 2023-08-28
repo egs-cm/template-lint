@@ -41,17 +41,19 @@ export class Reflection {
     this.pathMappings = pathMappings;
   }
 
-  add(path: string, source: string) {
+  add(path: string, source: string): ts.SourceFile {
 
     let parsed = Path.parse(Path.normalize(path));
     let moduleName = Path.join(parsed.dir, parsed.name);
 
-    if (this.pathToSource[moduleName] !== undefined)
+    if (this.getSource(moduleName) !== undefined)
       return;
 
     let reflection = ts.createSourceFile(moduleName, source, ts.ScriptTarget.Latest, true);
     this.sourceFiles.push(reflection);
     this.pathToSource[moduleName] = reflection;
+
+    return reflection;
   }
 
   addTypings(source: string) {
@@ -143,7 +145,7 @@ export class Reflection {
       exportSourceModule = Path.normalize(Path.join(base, `${exportModule}`));
     }
 
-    let exportSourceFile = this.pathToSource[exportSourceModule];
+    let exportSourceFile = this.getSource(exportSourceModule);
 
     if (!exportSourceFile)
       return null;
@@ -196,7 +198,7 @@ export class Reflection {
       inportSourceModule
     );
 
-    let inportSourceFile = this.pathToSource[inportSourceModule];
+    let inportSourceFile = this.getSource(inportSourceModule);
 
     if (!inportSourceFile)
       return null;
@@ -259,5 +261,11 @@ export class Reflection {
         //console.log(`unhandled kind ${ts.SyntaxKind[node.kind]} in resolveTypeName`);
         return null;
     }
+  }
+
+  private getSource(moduleName: string): ts.SourceFile {
+    return (
+      this.pathToSource[moduleName] ?? this.pathToSource[`${moduleName}/index`]
+    );
   }
 }
