@@ -55,4 +55,31 @@ describe("getDeclForType", () => {
     expect(result).not.toBeNull();
     expect(result).toBe(baseSource.statements.at(0));
   });
+  it("resolve second directory export", async () => {
+    const base = `
+    export class Base{
+      base:string;
+    }`;
+    const exporter = `
+      export * from "./foo";
+      export * from "./submodule";
+    `;
+
+    const viewmodel = `
+    import {Base} from "./exporter"
+    class Value extends Base{
+    }
+    export class Foo{
+      value:Value;
+    }`;
+
+    const viewModelSource = model.add("./foo.ts", viewmodel);
+    const baseSource = model.add("./submodule/index.ts", base);
+    model.add("./exporter", exporter);
+
+    const result = model.getDeclForType(viewModelSource, "Base")
+
+    expect(result).not.toBeNull();
+    expect(result).toBe(baseSource.statements.at(0));
+  });
 });

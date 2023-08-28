@@ -114,7 +114,7 @@ export class Reflection {
       (x): x is ts.ExportDeclaration =>
         x.kind == ts.SyntaxKind.ExportDeclaration
     );
-    let symbolExportDecl = exports.find(x => {
+    let symbolExportDeclarations = exports.filter(x => {
       if (!x.exportClause) {
         return true;  // export * from "module"
       }
@@ -133,24 +133,26 @@ export class Reflection {
       return isMatch != -1;
     });
 
-    if (!symbolExportDecl)
-      return null;
+    return symbolExportDeclarations
+      .map((declaration) => {
+        let exportModule = (<any>declaration).moduleSpecifier.text;
+        let isRelative = exportModule.startsWith(".");
+        let exportSourceModule = exportModule;
 
-    let exportModule = (<any>symbolExportDecl).moduleSpecifier.text;
-    let isRelative = exportModule.startsWith(".");
-    let exportSourceModule = exportModule;
+        if (isRelative) {
+          let base = Path.parse(source.fileName).dir;
+          exportSourceModule = Path.normalize(
+            Path.join(base, `${exportModule}`)
+          );
+        }
 
-    if (isRelative) {
-      let base = Path.parse(source.fileName).dir;
-      exportSourceModule = Path.normalize(Path.join(base, `${exportModule}`));
-    }
+        let exportSourceFile = this.getSource(exportSourceModule);
 
-    let exportSourceFile = this.getSource(exportSourceModule);
+        if (!exportSourceFile) return null;
 
-    if (!exportSourceFile)
-      return null;
-
-    return this.getDeclForType(exportSourceFile, typeName, false);
+        return this.getDeclForType(exportSourceFile, typeName, false);
+      })
+      .find((declaration) => declaration);
   }
 
   getDeclForTypeFromImports(source: ts.SourceFile, typeName: string): ts.DeclarationStatement {
