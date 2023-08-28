@@ -110,10 +110,12 @@ export class Reflection {
   getDeclForTypeFromExports(source: ts.SourceFile, typeName: string): ts.DeclarationStatement {
     if (!source || !typeName) return null;
 
-    let exports = source.statements.filter(x => x.kind == ts.SyntaxKind.ExportDeclaration);
-    let map: { [id: string]: ts.SourceFile } = {};
-    let symbolExportDecl = exports.find(x => {
-      if (!(<any>x).exportClause) {
+    let exports = source.statements.filter(
+      (x): x is ts.ExportDeclaration =>
+        x.kind == ts.SyntaxKind.ExportDeclaration
+    );
+    let symbolExportDeclarations = exports.filter(x => {
+      if (!x.exportClause) {
         return true;  // export * from "module"
       }
 
@@ -124,8 +126,6 @@ export class Reflection {
         return false;
       }
 
-      let importModule = (<any>x).moduleSpecifier.text;
-
       let isMatch = exportSymbols.findIndex(exportSymbol => {
         return exportSymbol.name.text == typeName;
       });
@@ -133,24 +133,26 @@ export class Reflection {
       return isMatch != -1;
     });
 
-    if (!symbolExportDecl)
-      return null;
+    return symbolExportDeclarations
+      .map((declaration) => {
+        let exportModule = (<any>declaration).moduleSpecifier.text;
+        let isRelative = exportModule.startsWith(".");
+        let exportSourceModule = exportModule;
 
-    let exportModule = (<any>symbolExportDecl).moduleSpecifier.text;
-    let isRelative = exportModule.startsWith(".");
-    let exportSourceModule = exportModule;
+        if (isRelative) {
+          let base = Path.parse(source.fileName).dir;
+          exportSourceModule = Path.normalize(
+            Path.join(base, `${exportModule}`)
+          );
+        }
 
-    if (isRelative) {
-      let base = Path.parse(source.fileName).dir;
-      exportSourceModule = Path.normalize(Path.join(base, `${exportModule}`));
-    }
+        let exportSourceFile = this.getSource(exportSourceModule);
 
-    let exportSourceFile = this.getSource(exportSourceModule);
+        if (!exportSourceFile) return null;
 
-    if (!exportSourceFile)
-      return null;
-
-    return this.getDeclForType(exportSourceFile, typeName, false);
+        return this.getDeclForType(exportSourceFile, typeName, false);
+      })
+      .find((declaration) => declaration);
   }
 
   getDeclForTypeFromImports(source: ts.SourceFile, typeName: string): ts.DeclarationStatement {
@@ -158,10 +160,12 @@ export class Reflection {
     
     typeName = typeName.split("<")[0]; //remove Generic types variable part when read imports declarations
     
-    let imports = source.statements.filter(x => x.kind == ts.SyntaxKind.ImportDeclaration);
-    let map: { [id: string]: ts.SourceFile } = {};
+    let imports = source.statements.filter(
+      (x): x is ts.ImportDeclaration =>
+        x.kind == ts.SyntaxKind.ImportDeclaration
+    );
     let symbolImportDecl = imports.find(x => {
-      if (!(<any>x).importClause) {
+      if (!x.importClause) {
         return false;  // smth like `import "module-name"`
       }
       const namedBindings = (<any>x).importClause.namedBindings;
@@ -172,8 +176,6 @@ export class Reflection {
       if (!importSymbols) {
         return false; // smth like `import * as name from "module-name"`
       }
-      let importModule = (<any>x).moduleSpecifier.text;
-
       let isMatch = importSymbols.findIndex(importSymbol => {
         return importSymbol.name.text == typeName;
       });
