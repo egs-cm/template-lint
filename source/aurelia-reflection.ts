@@ -7,7 +7,7 @@ import { Container } from "aurelia-dependency-injection";
 export class AureliaReflection {
   container: Container;
   resources;
-  bindingLanguage;
+  bindingLanguage: TemplatingBindingLanguage;
 
   constructor() {
     this.container = new Container();
@@ -19,9 +19,15 @@ export class AureliaReflection {
 
     var instruction: any = null;
 
-    let info: any = this.bindingLanguage.inspectAttribute(this.resources, tag, name, value);
+    let info = this.bindingLanguage.inspectAttribute(this.resources, tag, name, value);
     if (info)
-      instruction = this.bindingLanguage.createAttributeInstruction(this.resources, { tagName: tag }, info, undefined);
+      instruction = this.bindingLanguage.createAttributeInstruction(
+        this.resources,
+        { tagName: tag } as Element,
+        info,
+        undefined,
+        undefined
+      );
 
     return instruction;
   }
