@@ -80,7 +80,7 @@ export class AureliaLinter {
             reportBindingAccess: this.config.useRuleAureliaBindingAccess,
             reportUnresolvedViewModel: this.config.aureliaBindingAccessOpts.reportUnresolvedViewModel,
             localOverride: this.config.aureliaBindingAccessOpts.localOverride,
-            localProvidors: this.config.aureliaBindingAccessOpts.localProvidors,
+            localProviders: this.config.aureliaBindingAccessOpts.localProviders,
             restrictedAccess: this.config.aureliaBindingAccessOpts.restrictedAccess
           }));
 

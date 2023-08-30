@@ -128,11 +128,11 @@ export class Config {
 
   /**
   * Aurelia Binding Access Options
-  * localProvidors: list of attributes that generate local variables
+  * localProviders: list of attributes that generate local variables
   * restrictedAccess: access to type members with these modifiers will report an issue;
   */
   aureliaBindingAccessOpts = {
-    localProvidors: [
+    localProviders: [
       "repeat.for", "if.bind", "with.bind"
     ],
     localOverride: new Map([

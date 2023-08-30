@@ -34,7 +34,7 @@ export class BindingRule extends ASTBuilder {
   public reportBindingAccess = true;
   public reportUnresolvedViewModel = false;
 
-  public localProvidors = ["ref", "repeat.for", "if.bind", "with.bind"];
+  public localProviders = ["ref", "repeat.for", "if.bind", "with.bind"];
   public restrictedAccess = ["private", "protected"];
   public localOverride?= new Map<string, Array<{ name: string, value: any }>>();
 
@@ -45,7 +45,7 @@ export class BindingRule extends ASTBuilder {
       reportBindingSyntax?: boolean,
       reportBindingAccess?: boolean,
       reportUnresolvedViewModel?: boolean,
-      localProvidors?: string[],
+      localProviders?: string[],
       localOverride?: Map<string, Array<{ name: string, typeValue: any }>>
       restrictedAccess?: string[]
     }) {
@@ -97,8 +97,8 @@ export class BindingRule extends ASTBuilder {
 
   private examineElementNode(node: ASTElementNode) {
     let attrs = node.attrs.sort((a, b) => {
-      var ai = this.localProvidors.indexOf(a.name);
-      var bi = this.localProvidors.indexOf(b.name);
+      var ai = this.localProviders.indexOf(a.name);
+      var bi = this.localProviders.indexOf(b.name);
 
       if (ai == -1 && bi == -1)
         return 0;
