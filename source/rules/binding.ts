@@ -2,14 +2,12 @@
 
 import "aurelia-polyfills";
 
-import { TemplatingBindingLanguage, InterpolationBindingExpression } from "aurelia-templating-binding";
-import { ViewResources, BindingLanguage, BehaviorInstruction } from "aurelia-templating";
-import { AccessMember, AccessScope, AccessKeyed, Expression, NameExpression, ValueConverter, ListenerExpression } from "aurelia-binding";
-import { Container } from "aurelia-dependency-injection";
+import { BehaviorInstruction } from "aurelia-templating";
+import { NameExpression, ListenerExpression } from "aurelia-binding";
 import * as ts from "typescript";
 import * as Path from "path";
 
-import { Rule, Parser, ParserState, Issue, IssueSeverity } from "template-lint";
+import { Parser, Issue, IssueSeverity } from "template-lint";
 import { Reflection } from "../reflection";
 import { AureliaReflection } from '../aurelia-reflection';
 
@@ -42,7 +40,6 @@ export class BindingRule extends ASTBuilder {
     private reflection: Reflection,
     auReflection: AureliaReflection,
     opt?: {
-      reportBindingSyntax?: boolean,
       reportBindingAccess?: boolean,
       reportUnresolvedViewModel?: boolean,
       localProviders?: string[],
@@ -199,17 +196,6 @@ export class BindingRule extends ASTBuilder {
 
         break;
       }
-      case "with": {
-
-        let source = instruction.attributes["with"];
-        let chain = this.flattenAccessChain(source.sourceExpression);
-        let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
-
-        if (resolved != null)
-          node.context = resolved;
-
-        break;
-      }
       default:
         let attrExp = instruction.attributes[attrName];
         let access = instruction.attributes[attrName].sourceExpression;
@@ -219,6 +205,9 @@ export class BindingRule extends ASTBuilder {
         else {
           let chain = this.flattenAccessChain(access);
           let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
+
+          if (attrName === "with" && resolved !== null)
+            node.context = resolved;
         }
     };
   }
