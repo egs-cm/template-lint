@@ -223,7 +223,6 @@ export class BindingRule extends ASTBuilder {
   }
 
   private examineListenerExpression(node: ASTElementNode, exp: any /*ListenerExpression*/) {
-    let target: string = exp.targetEvent;
     let access = exp.sourceExpression;
     let chain = this.flattenAccessChain(access);
     let resolved = this.resolveAccessScopeToType(node, chain, node.location);
