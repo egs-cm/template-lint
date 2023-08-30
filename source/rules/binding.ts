@@ -67,6 +67,7 @@ export class BindingRule extends ASTBuilder {
         if (this.root.context != null)
           this.examineNode(this.root);
       } catch (error) {
+        console.error("An error occured while linting.", error);
         this.reportIssue(new Issue({ message: error, line: -1, column: -1 }));
       }
     }
