@@ -126,15 +126,13 @@ export class Config {
     scopes: ['html', 'body', 'template', 'svg', 'math']
   };
 
-  /**
-  * Aurelia Binding Access Options
-  * localProviders: list of attributes that generate local variables
-  * restrictedAccess: access to type members with these modifiers will report an issue;
-  */
+  /** Aurelia Binding Access Options */
   aureliaBindingAccessOpts = {
+    /** list of attributes that generate local variables */
     localProviders: [
       "repeat.for", "if.bind", "with.bind"
     ],
+    /** access to type members with these modifiers will report an issue */
     localOverride: new Map([
       ["my-tag", [{ name: "stubornLocal", typeValue: {} }]]
     ]),

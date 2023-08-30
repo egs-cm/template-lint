@@ -198,11 +198,11 @@ export class BindingRule extends ASTBuilder {
       }
       default:
         let attrExp = instruction.attributes[attrName];
-        let access = instruction.attributes[attrName].sourceExpression;
 
         if (attrExp.constructor.name == "InterpolationBindingExpression")
           this.examineInterpolationExpression(node, attrExp);
         else {
+          let access = instruction.attributes[attrName].sourceExpression;
           let chain = this.flattenAccessChain(access);
           let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
 
