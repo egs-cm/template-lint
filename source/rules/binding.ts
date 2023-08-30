@@ -224,6 +224,11 @@ export class BindingRule extends ASTBuilder {
 
   private examineListenerExpression(node: ASTElementNode, exp: any /*ListenerExpression*/) {
     let access = exp.sourceExpression;
+    if (access.args === undefined) {
+      this.reportInvalidTypeOfListenerExpression(node.location);
+      return;
+    }
+
     let chain = this.flattenAccessChain(access);
     let resolved = this.resolveAccessScopeToType(node, chain, node.location);
 
@@ -680,6 +685,16 @@ export class BindingRule extends ASTBuilder {
     this.reportIssue(issue);
   }
 
+  private reportInvalidTypeOfListenerExpression(location: FileLoc) {
+      this.reportIssue(
+        new Issue({
+          message: "Listener expressions must be function calls.",
+          line: location.line,
+          column: location.column,
+          severity: IssueSeverity.Error,
+        })
+      );
+  }
 }
 
 function hasModifier(node: ts.ParameterDeclaration | ts.ClassElement | ts.TypeElement, mod: ts.ModifierFlags): 0 | 1 {

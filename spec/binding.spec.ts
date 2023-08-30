@@ -1336,6 +1336,27 @@ describe("Static-Type Binding Tests", () => {
       });
   });
 
+  it("report non-function call in delegate binding", async () => {
+    const pageViewModel = `
+    export class Page {
+      value:number;
+    }`;
+
+    const pageView = `
+    <template>
+      \${value}
+      <form role="form" submit.delegate="value=0"></form>
+    </template>`;
+
+    const reflection = new Reflection();
+    const rule = new BindingRule(reflection, new AureliaReflection());
+    const linter = new Linter([rule]);
+    reflection.add("./page.ts", pageViewModel);
+    const issues = await linter.lint(pageView, "./page.html")
+    expect(issues.length).toBe(1);
+    expect(issues[0].message).toBe("Listener expressions must be function calls.");
+  });
+
   //87 
   it("Support named element binding", (done) => {
     let viewmodel = `
