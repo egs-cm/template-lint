@@ -130,7 +130,7 @@ export class Config {
   aureliaBindingAccessOpts = {
     /** list of attributes that generate local variables */
     localProviders: [
-      "repeat.for", "if.bind", "with.bind"
+      "ref", "repeat.for", "if.bind", "with.bind"
     ],
     /** access to type members with these modifiers will report an issue */
     localOverride: new Map([

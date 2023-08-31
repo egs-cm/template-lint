@@ -10,6 +10,7 @@ import * as Path from "path";
 import { Parser, Issue, IssueSeverity } from "template-lint";
 import { Reflection } from "../reflection";
 import { AureliaReflection } from '../aurelia-reflection';
+import { Config } from "../config";
 
 import {
   ASTBuilder,
@@ -29,28 +30,20 @@ import Identifier = ts.Identifier;
  *  Rule to ensure static type usage is valid
  */
 export class BindingRule extends ASTBuilder {
-  public reportBindingAccess = true;
-  public reportUnresolvedViewModel = false;
-
-  public localProviders = ["ref", "repeat.for", "if.bind", "with.bind"];
-  public restrictedAccess = ["private", "protected"];
-  public localOverride?= new Map<string, Array<{ name: string, value: any }>>();
-
   constructor(
     private reflection: Reflection,
     auReflection: AureliaReflection,
-    opt?: {
-      reportBindingAccess?: boolean,
-      reportUnresolvedViewModel?: boolean,
-      localProviders?: string[],
-      localOverride?: Map<string, Array<{ name: string, typeValue: any }>>
-      restrictedAccess?: string[]
-    }) {
-
+    private readonly opt: {
+      reportBindingAccess?: boolean;
+    } & Partial<Config["aureliaBindingAccessOpts"]> = {}
+  ) {
     super(auReflection);
 
-    if (opt)
-      Object.assign(this, opt);
+    this.opt = Object.assign(
+      { reportBindingAccess: true },
+      new Config().aureliaBindingAccessOpts,
+      this.opt
+    );
   }
 
   init(parser: Parser, path?: string) {
@@ -59,7 +52,7 @@ export class BindingRule extends ASTBuilder {
   }
 
   finalise(): Issue[] {
-    if (this.reportBindingAccess) {
+    if (this.opt.reportBindingAccess) {
       try {
         if (this.root.context != null)
           this.examineNode(this.root);
@@ -94,8 +87,8 @@ export class BindingRule extends ASTBuilder {
 
   private examineElementNode(node: ASTElementNode) {
     let attrs = node.attrs.sort((a, b) => {
-      var ai = this.localProviders.indexOf(a.name);
-      var bi = this.localProviders.indexOf(b.name);
+      var ai = this.opt.localProviders.indexOf(a.name);
+      var bi = this.opt.localProviders.indexOf(b.name);
 
       if (ai == -1 && bi == -1)
         return 0;
@@ -109,8 +102,8 @@ export class BindingRule extends ASTBuilder {
       return ai < bi ? -1 : 1;
     });
 
-    if (this.localOverride.has(node.tag)) {
-      node.locals.push(...this.localOverride.get(node.tag).map(x => new ASTContext(x)));
+    if (this.opt.localOverride.has(node.tag)) {
+      node.locals.push(...this.opt.localOverride.get(node.tag).map(x => new ASTContext(x)));
     }
 
     for (let i = 0, ii = attrs.length; i < ii; ++i) {
@@ -281,7 +274,7 @@ export class BindingRule extends ASTBuilder {
     let viewModelSource = this.reflection.pathToSource[viewModelFile] as ts.SourceFile;
 
     if (!viewModelSource) {
-      if (this.reportUnresolvedViewModel) {
+      if (this.opt.reportUnresolvedViewModel) {
         this.reportIssue(
           new Issue({
             message: `no view-model source-file found`,
@@ -309,7 +302,7 @@ export class BindingRule extends ASTBuilder {
       );
 
     if (classes == null || classes.length == 0) {
-      if (this.reportUnresolvedViewModel) {
+      if (this.opt.reportUnresolvedViewModel) {
         this.reportIssue(
           new Issue({
             message: `no classes found in view-model source-file`,
@@ -484,12 +477,12 @@ export class BindingRule extends ASTBuilder {
     if (!memberType)
       return null;
 
-    if (this.restrictedAccess.length > 0) {
+    if (this.opt.restrictedAccess.length > 0) {
       const isPrivate = hasModifier(member, ts.ModifierFlags.Private);
       const isProtected = hasModifier(member, ts.ModifierFlags.Protected);
 
-      const restrictPrivate = this.restrictedAccess.indexOf("private") != -1;
-      const restrictProtected = this.restrictedAccess.indexOf("protected") != -1;
+      const restrictPrivate = this.opt.restrictedAccess.indexOf("private") != -1;
+      const restrictProtected = this.opt.restrictedAccess.indexOf("protected") != -1;
 
       if (isPrivate && restrictPrivate || isProtected && restrictProtected) {
         const accessModifier = isPrivate ? "private" : "protected";
