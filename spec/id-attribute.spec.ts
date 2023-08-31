@@ -1,10 +1,10 @@
 "use strict";
 
 import { Linter, Rule } from 'template-lint';
-import { Config } from '../source/config';
-import { AureliaLinter } from '../source/aurelia-linter';
-import { BindingRule } from '../source/rules/binding';
-import { Reflection } from '../source/reflection';
+import { Config } from '@base/config';
+import { AureliaLinter } from '@base/aurelia-linter';
+import { BindingRule } from '@base/rules/binding';
+import { Reflection } from '@base/reflection';
 import { initialize } from 'aurelia-pal-nodejs';
 
 initialize();

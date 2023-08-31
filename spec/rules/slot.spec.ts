@@ -1,6 +1,6 @@
 
 import { Linter, Rule } from 'template-lint';
-import { SlotRule } from '../source/rules/slot';
+import { SlotRule } from '@base/rules/slot';
 
 describe("Slot Rule", () => {
 

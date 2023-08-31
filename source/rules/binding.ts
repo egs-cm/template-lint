@@ -8,9 +8,9 @@ import * as ts from "typescript";
 import * as Path from "path";
 
 import { Parser, Issue, IssueSeverity } from "template-lint";
-import { Reflection } from "../reflection";
-import { AureliaReflection } from '../aurelia-reflection';
-import { Config } from "../config";
+import { Reflection } from "@base/reflection";
+import { AureliaReflection } from '@base/aurelia-reflection';
+import { Config } from "@base/config";
 
 import {
   ASTBuilder,
@@ -20,7 +20,7 @@ import {
   ASTAttribute,
   ASTContext,
   FileLoc
-} from "../ast";
+} from "@base/ast";
 import Node = ts.Node;
 import NodeArray = ts.NodeArray;
 import Decorator = ts.Decorator;

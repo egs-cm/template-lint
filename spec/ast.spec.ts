@@ -1,8 +1,8 @@
 
 import { Linter, Rule } from 'template-lint';
-import { BindingRule } from '../source/rules/binding';
-import { Reflection } from '../source/reflection';
-import { ASTNode, ASTContext, ASTBuilder, ASTElementNode } from '../source/ast';
+import { BindingRule } from '@base/rules/binding';
+import { Reflection } from '@base/reflection';
+import { ASTNode, ASTContext, ASTBuilder, ASTElementNode } from '@base/ast';
 import * as ts from 'typescript';
 
 describe("Abstract Syntax Tree", () => {
