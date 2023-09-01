@@ -641,26 +641,12 @@ export class BindingRule extends ASTBuilder {
 
   private reportUnresolvedAccessObjectIssue(member: string, objectName: string, loc: FileLoc) {
     let msg = `cannot find '${member}' in object '${objectName}'`;
-    let issue = new Issue({
-      message: msg,
-      line: loc.line,
-      column: loc.column,
-      severity: IssueSeverity.Error
-    });
-
-    this.reportIssue(issue);
+    this.reportErrorIssue(msg, loc);
   }
 
   private reportUnresolvedAccessMemberIssue(member: string, decl: ts.NamedDeclaration, loc: FileLoc) {
     let msg = `cannot find '${member}' in type '${decl.name.getText()}'`;
-    let issue = new Issue({
-      message: msg,
-      line: loc.line,
-      column: loc.column,
-      severity: IssueSeverity.Error
-    });
-
-    this.reportIssue(issue);
+    this.reportErrorIssue(msg, loc);
   }
 
   private reportPrivateAccessMemberIssue(member: string, decl: ts.NamedDeclaration, loc: FileLoc, accessModifier: string) {
@@ -676,14 +662,14 @@ export class BindingRule extends ASTBuilder {
   }
 
   private reportInvalidTypeOfListenerExpression(location: FileLoc) {
-      this.reportIssue(
-        new Issue({
-          message: "Listener expressions must be function calls.",
-          line: location.line,
-          column: location.column,
-          severity: IssueSeverity.Error,
-        })
-      );
+    this.reportErrorIssue("Listener expressions must be function calls.", location);
+  }
+
+  private reportErrorIssue(message: string, location: FileLoc): void {
+    const severity = IssueSeverity.Error;
+    const issue = new Issue({ message, ...location, severity, });
+
+    this.reportIssue(issue);
   }
 }
 
