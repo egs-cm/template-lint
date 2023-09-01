@@ -146,6 +146,26 @@ describe("Static-Type Binding Tests", () => {
           }
         });
     });
+
+    it("support custom repeater", async () => {
+      const pageViewModel = `
+      export class Page {
+        items:string[]
+      }`;
+
+      const pageView = `
+        <template>
+          <div custom-repeat.for="item of items"></div>
+        </template>
+      `
+
+      const reflection = new Reflection();
+      const rule = new BindingRule(reflection, new AureliaReflection());
+      const linter = new Linter([rule]);
+      reflection.add("./page.ts", pageViewModel);
+      const issues = await linter.lint(pageView, "./page.html")
+      expect(issues.length).toBe(0);
+    });
   });
 
 

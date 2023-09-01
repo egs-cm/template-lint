@@ -160,49 +160,97 @@ export class BindingRule extends ASTBuilder {
   private examineBehaviorInstruction(node: ASTElementNode, instruction: BehaviorInstruction) {
     let attrName = instruction.attrName;
     let attrLoc = node.location;
-    switch (attrName) {
-      case "repeat": {
 
-        let varKey = <string>instruction.attributes["key"];
-        let varValue = <string>instruction.attributes["value"];
-        let varLocal = <string>instruction.attributes["local"];
-        let source = instruction.attributes["items"];
-        let chain = this.flattenAccessChain(source.sourceExpression);
-        let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
+    if (instruction.attributes["local"] && instruction.attributes["items"]) {
+      let varKey = <string>instruction.attributes["key"];
+      let varValue = <string>instruction.attributes["value"];
+      let varLocal = <string>instruction.attributes["local"];
+      let source = instruction.attributes["items"];
+      let chain = this.flattenAccessChain(source.sourceExpression);
+      let resolved = this.resolveAccessScopeToType(
+        node,
+        chain,
+        new FileLoc(attrLoc.line, attrLoc.column)
+      );
 
-        let type = resolved ? resolved.type : null;
-        let typeDecl = resolved ? resolved.typeDecl : null;
+      let type = resolved ? resolved.type : null;
+      let typeDecl = resolved ? resolved.typeDecl : null;
 
-        if (varKey && varValue) {
-          node.locals.push(new ASTContext({ name: varKey, type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.StringKeyword) }));
-          node.locals.push(new ASTContext({ name: varValue, type: type, typeDecl: typeDecl }));
-        }
-        else {
-          node.locals.push(new ASTContext({ name: varLocal, type: type, typeDecl: typeDecl }));
-        }
-
-        node.locals.push(new ASTContext({ name: "$index", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.NumberKeyword) }));
-        node.locals.push(new ASTContext({ name: "$first", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$last", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$odd", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$even", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-
-        break;
+      if (varKey && varValue) {
+        node.locals.push(
+          new ASTContext({
+            name: varKey,
+            type: <ts.TypeNode>(
+              ts.factory.createToken(ts.SyntaxKind.StringKeyword)
+            ),
+          })
+        );
+        node.locals.push(
+          new ASTContext({ name: varValue, type: type, typeDecl: typeDecl })
+        );
+      } else {
+        node.locals.push(
+          new ASTContext({ name: varLocal, type: type, typeDecl: typeDecl })
+        );
       }
-      default:
-        let attrExp = instruction.attributes[attrName];
 
-        if (attrExp.constructor.name == "InterpolationBindingExpression")
-          this.examineInterpolationExpression(node, attrExp);
-        else {
-          let access = instruction.attributes[attrName].sourceExpression;
-          let chain = this.flattenAccessChain(access);
-          let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
+      node.locals.push(
+        new ASTContext({
+          name: "$index",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.NumberKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$first",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$last",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$odd",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$even",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+    } else {
+      let attrExp = instruction.attributes[attrName];
 
-          if (attrName === "with" && resolved !== null)
-            node.context = resolved;
-        }
-    };
+      if (attrExp.constructor.name == "InterpolationBindingExpression")
+        this.examineInterpolationExpression(node, attrExp);
+      else {
+        let access = instruction.attributes[attrName].sourceExpression;
+        let chain = this.flattenAccessChain(access);
+        let resolved = this.resolveAccessScopeToType(
+          node,
+          chain,
+          new FileLoc(attrLoc.line, attrLoc.column)
+        );
+
+        if (attrName === "with" && resolved !== null) node.context = resolved;
+      }
+    }
   }
 
   private examineListenerExpression(node: ASTElementNode, exp: any /*ListenerExpression*/) {
