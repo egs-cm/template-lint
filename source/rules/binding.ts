@@ -2,16 +2,15 @@
 
 import "aurelia-polyfills";
 
-import { TemplatingBindingLanguage, InterpolationBindingExpression } from "aurelia-templating-binding";
-import { ViewResources, BindingLanguage, BehaviorInstruction } from "aurelia-templating";
-import { AccessMember, AccessScope, AccessKeyed, Expression, NameExpression, ValueConverter, ListenerExpression } from "aurelia-binding";
-import { Container } from "aurelia-dependency-injection";
+import { BehaviorInstruction } from "aurelia-templating";
+import { NameExpression, ListenerExpression } from "aurelia-binding";
 import * as ts from "typescript";
 import * as Path from "path";
 
-import { Rule, Parser, ParserState, Issue, IssueSeverity } from "template-lint";
-import { Reflection } from "../reflection";
-import { AureliaReflection } from '../aurelia-reflection';
+import { Parser, Issue, IssueSeverity } from "template-lint";
+import { Reflection } from "@base/reflection";
+import { AureliaReflection } from '@base/aurelia-reflection';
+import { Config } from "@base/config";
 
 import {
   ASTBuilder,
@@ -21,7 +20,7 @@ import {
   ASTAttribute,
   ASTContext,
   FileLoc
-} from "../ast";
+} from "@base/ast";
 import Node = ts.Node;
 import NodeArray = ts.NodeArray;
 import Decorator = ts.Decorator;
@@ -31,29 +30,20 @@ import Identifier = ts.Identifier;
  *  Rule to ensure static type usage is valid
  */
 export class BindingRule extends ASTBuilder {
-  public reportBindingAccess = true;
-  public reportUnresolvedViewModel = false;
-
-  public localProvidors = ["ref", "repeat.for", "if.bind", "with.bind"];
-  public restrictedAccess = ["private", "protected"];
-  public localOverride?= new Map<string, Array<{ name: string, value: any }>>();
-
   constructor(
     private reflection: Reflection,
     auReflection: AureliaReflection,
-    opt?: {
-      reportBindingSyntax?: boolean,
-      reportBindingAccess?: boolean,
-      reportUnresolvedViewModel?: boolean,
-      localProvidors?: string[],
-      localOverride?: Map<string, Array<{ name: string, typeValue: any }>>
-      restrictedAccess?: string[]
-    }) {
-
+    private readonly opt: {
+      reportBindingAccess?: boolean;
+    } & Partial<Config["aureliaBindingAccessOpts"]> = {}
+  ) {
     super(auReflection);
 
-    if (opt)
-      Object.assign(this, opt);
+    this.opt = Object.assign(
+      { reportBindingAccess: true },
+      new Config().aureliaBindingAccessOpts,
+      this.opt
+    );
   }
 
   init(parser: Parser, path?: string) {
@@ -62,11 +52,12 @@ export class BindingRule extends ASTBuilder {
   }
 
   finalise(): Issue[] {
-    if (this.reportBindingAccess) {
+    if (this.opt.reportBindingAccess) {
       try {
         if (this.root.context != null)
           this.examineNode(this.root);
       } catch (error) {
+        console.error("An error occured while linting.", error);
         this.reportIssue(new Issue({ message: error, line: -1, column: -1 }));
       }
     }
@@ -96,8 +87,8 @@ export class BindingRule extends ASTBuilder {
 
   private examineElementNode(node: ASTElementNode) {
     let attrs = node.attrs.sort((a, b) => {
-      var ai = this.localProvidors.indexOf(a.name);
-      var bi = this.localProvidors.indexOf(b.name);
+      var ai = this.opt.localProviders.indexOf(a.name);
+      var bi = this.opt.localProviders.indexOf(b.name);
 
       if (ai == -1 && bi == -1)
         return 0;
@@ -111,8 +102,8 @@ export class BindingRule extends ASTBuilder {
       return ai < bi ? -1 : 1;
     });
 
-    if (this.localOverride.has(node.tag)) {
-      node.locals.push(...this.localOverride.get(node.tag).map(x => new ASTContext(x)));
+    if (this.opt.localOverride.has(node.tag)) {
+      node.locals.push(...this.opt.localOverride.get(node.tag).map(x => new ASTContext(x)));
     }
 
     for (let i = 0, ii = attrs.length; i < ii; ++i) {
@@ -169,57 +160,97 @@ export class BindingRule extends ASTBuilder {
   private examineBehaviorInstruction(node: ASTElementNode, instruction: BehaviorInstruction) {
     let attrName = instruction.attrName;
     let attrLoc = node.location;
-    switch (attrName) {
-      case "repeat": {
 
-        let varKey = <string>instruction.attributes["key"];
-        let varValue = <string>instruction.attributes["value"];
-        let varLocal = <string>instruction.attributes["local"];
-        let source = instruction.attributes["items"];
-        let chain = this.flattenAccessChain(source.sourceExpression);
-        let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
+    if (instruction.attributes["local"] && instruction.attributes["items"]) {
+      let varKey = <string>instruction.attributes["key"];
+      let varValue = <string>instruction.attributes["value"];
+      let varLocal = <string>instruction.attributes["local"];
+      let source = instruction.attributes["items"];
+      let chain = this.flattenAccessChain(source.sourceExpression);
+      let resolved = this.resolveAccessScopeToType(
+        node,
+        chain,
+        new FileLoc(attrLoc.line, attrLoc.column)
+      );
 
-        let type = resolved ? resolved.type : null;
-        let typeDecl = resolved ? resolved.typeDecl : null;
+      let type = resolved ? resolved.type : null;
+      let typeDecl = resolved ? resolved.typeDecl : null;
 
-        if (varKey && varValue) {
-          node.locals.push(new ASTContext({ name: varKey, type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.StringKeyword) }));
-          node.locals.push(new ASTContext({ name: varValue, type: type, typeDecl: typeDecl }));
-        }
-        else {
-          node.locals.push(new ASTContext({ name: varLocal, type: type, typeDecl: typeDecl }));
-        }
-
-        node.locals.push(new ASTContext({ name: "$index", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.NumberKeyword) }));
-        node.locals.push(new ASTContext({ name: "$first", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$last", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$odd", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-        node.locals.push(new ASTContext({ name: "$even", type: <ts.TypeNode>ts.factory.createToken(ts.SyntaxKind.BooleanKeyword) }));
-
-        break;
+      if (varKey && varValue) {
+        node.locals.push(
+          new ASTContext({
+            name: varKey,
+            type: <ts.TypeNode>(
+              ts.factory.createToken(ts.SyntaxKind.StringKeyword)
+            ),
+          })
+        );
+        node.locals.push(
+          new ASTContext({ name: varValue, type: type, typeDecl: typeDecl })
+        );
+      } else {
+        node.locals.push(
+          new ASTContext({ name: varLocal, type: type, typeDecl: typeDecl })
+        );
       }
-      case "with": {
 
-        let source = instruction.attributes["with"];
-        let chain = this.flattenAccessChain(source.sourceExpression);
-        let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
+      node.locals.push(
+        new ASTContext({
+          name: "$index",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.NumberKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$first",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$last",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$odd",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+      node.locals.push(
+        new ASTContext({
+          name: "$even",
+          type: <ts.TypeNode>(
+            ts.factory.createToken(ts.SyntaxKind.BooleanKeyword)
+          ),
+        })
+      );
+    } else {
+      let attrExp = instruction.attributes[attrName];
 
-        if (resolved != null)
-          node.context = resolved;
-
-        break;
-      }
-      default:
-        let attrExp = instruction.attributes[attrName];
+      if (attrExp.constructor.name == "InterpolationBindingExpression")
+        this.examineInterpolationExpression(node, attrExp);
+      else {
         let access = instruction.attributes[attrName].sourceExpression;
+        let chain = this.flattenAccessChain(access);
+        let resolved = this.resolveAccessScopeToType(
+          node,
+          chain,
+          new FileLoc(attrLoc.line, attrLoc.column)
+        );
 
-        if (attrExp.constructor.name == "InterpolationBindingExpression")
-          this.examineInterpolationExpression(node, attrExp);
-        else {
-          let chain = this.flattenAccessChain(access);
-          let resolved = this.resolveAccessScopeToType(node, chain, new FileLoc(attrLoc.line, attrLoc.column));
-        }
-    };
+        if (attrName === "with" && resolved !== null) node.context = resolved;
+      }
+    }
   }
 
   private examineListenerExpression(node: ASTElementNode, exp: any /*ListenerExpression*/) {
@@ -291,7 +322,7 @@ export class BindingRule extends ASTBuilder {
     let viewModelSource = this.reflection.pathToSource[viewModelFile] as ts.SourceFile;
 
     if (!viewModelSource) {
-      if (this.reportUnresolvedViewModel) {
+      if (this.opt.reportUnresolvedViewModel) {
         this.reportIssue(
           new Issue({
             message: `no view-model source-file found`,
@@ -319,7 +350,7 @@ export class BindingRule extends ASTBuilder {
       );
 
     if (classes == null || classes.length == 0) {
-      if (this.reportUnresolvedViewModel) {
+      if (this.opt.reportUnresolvedViewModel) {
         this.reportIssue(
           new Issue({
             message: `no classes found in view-model source-file`,
@@ -494,12 +525,12 @@ export class BindingRule extends ASTBuilder {
     if (!memberType)
       return null;
 
-    if (this.restrictedAccess.length > 0) {
+    if (this.opt.restrictedAccess.length > 0) {
       const isPrivate = hasModifier(member, ts.ModifierFlags.Private);
       const isProtected = hasModifier(member, ts.ModifierFlags.Protected);
 
-      const restrictPrivate = this.restrictedAccess.indexOf("private") != -1;
-      const restrictProtected = this.restrictedAccess.indexOf("protected") != -1;
+      const restrictPrivate = this.opt.restrictedAccess.indexOf("private") != -1;
+      const restrictProtected = this.opt.restrictedAccess.indexOf("protected") != -1;
 
       if (isPrivate && restrictPrivate || isProtected && restrictProtected) {
         const accessModifier = isPrivate ? "private" : "protected";
@@ -651,26 +682,12 @@ export class BindingRule extends ASTBuilder {
 
   private reportUnresolvedAccessObjectIssue(member: string, objectName: string, loc: FileLoc) {
     let msg = `cannot find '${member}' in object '${objectName}'`;
-    let issue = new Issue({
-      message: msg,
-      line: loc.line,
-      column: loc.column,
-      severity: IssueSeverity.Error
-    });
-
-    this.reportIssue(issue);
+    this.reportErrorIssue(msg, loc);
   }
 
   private reportUnresolvedAccessMemberIssue(member: string, decl: ts.NamedDeclaration, loc: FileLoc) {
     let msg = `cannot find '${member}' in type '${decl.name.getText()}'`;
-    let issue = new Issue({
-      message: msg,
-      line: loc.line,
-      column: loc.column,
-      severity: IssueSeverity.Error
-    });
-
-    this.reportIssue(issue);
+    this.reportErrorIssue(msg, loc);
   }
 
   private reportPrivateAccessMemberIssue(member: string, decl: ts.NamedDeclaration, loc: FileLoc, accessModifier: string) {
@@ -686,14 +703,14 @@ export class BindingRule extends ASTBuilder {
   }
 
   private reportInvalidTypeOfListenerExpression(location: FileLoc) {
-      this.reportIssue(
-        new Issue({
-          message: "Listener expressions must be function calls.",
-          line: location.line,
-          column: location.column,
-          severity: IssueSeverity.Error,
-        })
-      );
+    this.reportErrorIssue("Listener expressions must be function calls.", location);
+  }
+
+  private reportErrorIssue(message: string, location: FileLoc): void {
+    const severity = IssueSeverity.Error;
+    const issue = new Issue({ message, ...location, severity, });
+
+    this.reportIssue(issue);
   }
 }
 

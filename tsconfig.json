@@ -5,7 +5,9 @@
     "sourceMap": true,
     "noEmitOnError": true,
     "newLine": "LF",
-    "declaration": true
+    "declaration": true,
+    "outDir": "./dist",
+    "paths": {"@base/*":[ "./source/*"]}
   },
   "exclude": ["node_modules"]
 }

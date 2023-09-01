@@ -1,4 +1,4 @@
-import { Reflection } from "../source";
+import { Reflection } from "@base/reflection";
 
 let model: Reflection;
 

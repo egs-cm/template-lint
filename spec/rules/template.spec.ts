@@ -1,6 +1,6 @@
 
 import { Linter, Rule } from 'template-lint';
-import { TemplateRule } from '../source/rules/template';
+import { TemplateRule } from '@base/rules/template';
 
 describe("Template Rule", () => {
 

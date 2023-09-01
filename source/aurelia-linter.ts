@@ -72,17 +72,11 @@ export class AureliaLinter {
 
     if (this.config.useRuleAureliaBindingAccess || this.config.useRuleAureliaBindingSyntax)
       rules.push(
-        new BindingRule(
-          this.reflection,
-          this.auReflection,
-          {
-            reportBindingSyntax: this.config.useRuleAureliaBindingSyntax,
-            reportBindingAccess: this.config.useRuleAureliaBindingAccess,
-            reportUnresolvedViewModel: this.config.aureliaBindingAccessOpts.reportUnresolvedViewModel,
-            localOverride: this.config.aureliaBindingAccessOpts.localOverride,
-            localProvidors: this.config.aureliaBindingAccessOpts.localProvidors,
-            restrictedAccess: this.config.aureliaBindingAccessOpts.restrictedAccess
-          }));
+        new BindingRule(this.reflection, this.auReflection, {
+          reportBindingAccess: this.config.useRuleAureliaBindingAccess,
+          ...this.config.aureliaBindingAccessOpts,
+        })
+      );
 
     if (this.config.customRules)
       rules = rules.concat(config.customRules);

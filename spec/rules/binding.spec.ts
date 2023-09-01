@@ -1,9 +1,9 @@
 
 import { Linter, Rule } from 'template-lint';
-import { BindingRule } from '../source/rules/binding';
-import { Reflection } from '../source/reflection';
-import { AureliaReflection } from '../source/aurelia-reflection';
-import { ASTNode } from '../source/ast';
+import { BindingRule } from '@base/rules/binding';
+import { Reflection } from '@base/reflection';
+import { AureliaReflection } from '@base/aurelia-reflection';
+import { ASTNode } from '@base/ast';
 
 describe("Static-Type Binding Tests", () => {
 
@@ -145,6 +145,26 @@ describe("Static-Type Binding Tests", () => {
             done();
           }
         });
+    });
+
+    it("support custom repeater", async () => {
+      const pageViewModel = `
+      export class Page {
+        items:string[]
+      }`;
+
+      const pageView = `
+        <template>
+          <div custom-repeat.for="item of items"></div>
+        </template>
+      `
+
+      const reflection = new Reflection();
+      const rule = new BindingRule(reflection, new AureliaReflection());
+      const linter = new Linter([rule]);
+      reflection.add("./page.ts", pageViewModel);
+      const issues = await linter.lint(pageView, "./page.html")
+      expect(issues.length).toBe(0);
     });
   });
 
