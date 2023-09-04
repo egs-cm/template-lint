@@ -3,6 +3,10 @@ import * as ts from "typescript";
 import { glob } from "glob";
 import * as fs from "fs";
 
+function removeQuotes(text: string): string {
+  return text.slice(1, -1);
+}
+
 /*
 * Manage Reflection information for available sources
 */
@@ -135,7 +139,7 @@ export class Reflection {
 
     return symbolExportDeclarations
       .map((declaration) => {
-        let exportModule = (<any>declaration).moduleSpecifier.text;
+        let exportModule = removeQuotes(declaration.moduleSpecifier.getText());
         let isRelative = exportModule.startsWith(".");
         let exportSourceModule = exportModule;
 
@@ -186,7 +190,7 @@ export class Reflection {
     if (!symbolImportDecl)
       return null;
 
-    let importModule = (<any>symbolImportDecl).moduleSpecifier.text as string;
+    let importModule = removeQuotes(symbolImportDecl.moduleSpecifier.getText());
     let isRelative = importModule.startsWith(".");
     let inportSourceModule = importModule;
 
