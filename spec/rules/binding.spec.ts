@@ -62,7 +62,7 @@ describe("Static-Type Binding Tests", () => {
       }`;
 
       let viewmodel = `
-      import {Item} from './path/item
+      import {Item} from './path/item'
       export class Foo{
         items:Item[]
       }`;
@@ -92,7 +92,7 @@ describe("Static-Type Binding Tests", () => {
       }`;
 
       let viewmodel = `
-      import {Item} from './path/item
+      import {Item} from './path/item'
       export class Foo{
         items:Item[]
       }`;
@@ -362,7 +362,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       item:Item
     }`;
@@ -391,7 +391,7 @@ describe("Static-Type Binding Tests", () => {
       info:string;
     }`;
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       item:Item
     }`;
@@ -422,7 +422,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       item:Item
     }`;
@@ -450,7 +450,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       item:Item
     }`;
@@ -480,7 +480,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       items:Item[]
     }`;
@@ -938,7 +938,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       items:Item[]
       index:number;
@@ -1010,7 +1010,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './path/item
+    import {Item} from './path/item'
     export class Foo{
       get item(): Item {}
     }`;
@@ -1075,7 +1075,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './item
+    import {Item} from './item'
     export class Foo{
       items: Item[];
     }`;
@@ -1108,7 +1108,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './item
+    import {Item} from './item'
     export class Foo{
       items: Array<Item>;
     }`;
@@ -1144,7 +1144,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Base} from './base
+    import {Base} from './base'
     export class Foo extends Base{
     }`;
 
@@ -1182,7 +1182,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './item
+    import {Item} from './item'
     export class Foo{
       item: Item;
     }`;
@@ -1257,7 +1257,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './item
+    import {Item} from './item'
     export class Foo {
       item:Item;
     }`;
@@ -1297,7 +1297,7 @@ describe("Static-Type Binding Tests", () => {
     }`;
 
     let viewmodel = `
-    import {Item} from './item
+    import {Item} from './item'
     export class Foo {
       item:Item;
     }`;

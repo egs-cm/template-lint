@@ -82,4 +82,31 @@ describe("getDeclForType", () => {
     expect(result).not.toBeNull();
     expect(result).toBe(baseSource.statements.at(0));
   });
+  test("support reexport from import", () => {
+    const base = `
+    export class Base{
+      base:string;
+    }`;
+    const reexporter = `
+      import { Base } from "./base";
+      export { Base };
+    `;
+
+    const viewmodel = `
+    import {Base} from "./reexporter"
+    class Value extends Base{
+    }
+    export class Foo{
+      value:Value;
+    }`;
+
+    const viewModelSource = model.add("./foo.ts", viewmodel);
+    const baseSource = model.add("./base", base);
+    model.add("./reexporter", reexporter);
+
+    const result = model.getDeclForType(viewModelSource, "Base")
+
+    expect(result).not.toBeNull();
+    expect(result).toBe(baseSource.statements.at(0));
+  });
 });

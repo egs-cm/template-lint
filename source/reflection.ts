@@ -3,6 +3,10 @@ import * as ts from "typescript";
 import { glob } from "glob";
 import * as fs from "fs";
 
+function removeQuotes(text: string): string {
+  return text.slice(1, -1);
+}
+
 /*
 * Manage Reflection information for available sources
 */
@@ -74,8 +78,8 @@ export class Reflection {
 
     if (source.kind == ts.SyntaxKind.SourceFile) {
       let types = source.statements.filter(x =>
-        x.kind == ts.SyntaxKind.ClassDeclaration ||
-        x.kind == ts.SyntaxKind.InterfaceDeclaration);
+        x.kind === ts.SyntaxKind.ClassDeclaration ||
+        x.kind === ts.SyntaxKind.InterfaceDeclaration);
 
       let result: ts.DeclarationStatement = null;
 
@@ -112,7 +116,7 @@ export class Reflection {
 
     let exports = source.statements.filter(
       (x): x is ts.ExportDeclaration =>
-        x.kind == ts.SyntaxKind.ExportDeclaration
+        x.kind === ts.SyntaxKind.ExportDeclaration
     );
     let symbolExportDeclarations = exports.filter(x => {
       if (!x.exportClause) {
@@ -121,12 +125,11 @@ export class Reflection {
 
       // export {Item} from "module"
 
-      let exportSymbols = (<any>x).exportClause.elements;
-      if (!exportSymbols) {
+      if (!("elements" in x.exportClause)) {
         return false;
       }
 
-      let isMatch = exportSymbols.findIndex(exportSymbol => {
+      let isMatch = x.exportClause.elements.findIndex(exportSymbol => {
         return exportSymbol.name.text == typeName;
       });
 
@@ -135,7 +138,11 @@ export class Reflection {
 
     return symbolExportDeclarations
       .map((declaration) => {
-        let exportModule = (<any>declaration).moduleSpecifier.text;
+        if (!declaration.moduleSpecifier) {
+          return this.getDeclForTypeFromImports(source, typeName);
+        }
+
+        let exportModule = removeQuotes(declaration.moduleSpecifier.getText());
         let isRelative = exportModule.startsWith(".");
         let exportSourceModule = exportModule;
 
@@ -168,15 +175,14 @@ export class Reflection {
       if (!x.importClause) {
         return false;  // smth like `import "module-name"`
       }
-      const namedBindings = (<any>x).importClause.namedBindings;
+      const namedBindings = x.importClause.namedBindings;
       if (!namedBindings) {
         return false; // smth like `import defaultMember from "module-name";`;
       }
-      let importSymbols = namedBindings.elements;
-      if (!importSymbols) {
+      if (!("elements" in namedBindings)) {
         return false; // smth like `import * as name from "module-name"`
       }
-      let isMatch = importSymbols.findIndex(importSymbol => {
+      let isMatch = namedBindings.elements.findIndex(importSymbol => {
         return importSymbol.name.text == typeName;
       });
 
@@ -186,7 +192,7 @@ export class Reflection {
     if (!symbolImportDecl)
       return null;
 
-    let importModule = (<any>symbolImportDecl).moduleSpecifier.text as string;
+    let importModule = removeQuotes(symbolImportDecl.moduleSpecifier.getText());
     let isRelative = importModule.startsWith(".");
     let inportSourceModule = importModule;
 
