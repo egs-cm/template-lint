@@ -138,6 +138,10 @@ export class Reflection {
 
     return symbolExportDeclarations
       .map((declaration) => {
+        if (!declaration.moduleSpecifier) {
+          return this.getDeclForTypeFromImports(source, typeName);
+        }
+
         let exportModule = removeQuotes(declaration.moduleSpecifier.getText());
         let isRelative = exportModule.startsWith(".");
         let exportSourceModule = exportModule;
