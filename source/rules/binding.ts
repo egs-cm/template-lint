@@ -3,7 +3,7 @@
 import "aurelia-polyfills";
 
 import { BehaviorInstruction } from "aurelia-templating";
-import { NameExpression, ListenerExpression } from "aurelia-binding";
+import { NameExpression, ListenerExpression, Expression } from "aurelia-binding";
 import * as ts from "typescript";
 import * as Path from "path";
 
@@ -25,6 +25,8 @@ import Node = ts.Node;
 import NodeArray = ts.NodeArray;
 import Decorator = ts.Decorator;
 import Identifier = ts.Identifier;
+
+type BindingExpression = { sourceExpression: Expression };
 
 /**
  *  Rule to ensure static type usage is valid
@@ -158,14 +160,14 @@ export class BindingRule extends ASTBuilder {
   }
 
   private examineBehaviorInstruction(node: ASTElementNode, instruction: BehaviorInstruction) {
-    let attrName = instruction.attrName;
-    let attrLoc = node.location;
+    const { attrName, attributes } = instruction;
+    const attrLoc = node.location;
 
-    if (instruction.attributes["local"] && instruction.attributes["items"]) {
-      let varKey = <string>instruction.attributes["key"];
-      let varValue = <string>instruction.attributes["value"];
-      let varLocal = <string>instruction.attributes["local"];
-      let source = instruction.attributes["items"];
+    if ("items" in attributes) {
+      const varKey = attributes["key"] as string;
+      const varValue = attributes["value"] as string;
+      const varLocal = attributes["local"] as string;
+      const source = attributes["items"] as BindingExpression;
       let chain = this.flattenAccessChain(source.sourceExpression);
       let resolved = this.resolveAccessScopeToType(
         node,
@@ -235,12 +237,12 @@ export class BindingRule extends ASTBuilder {
         })
       );
     } else {
-      let attrExp = instruction.attributes[attrName];
+      const attrExp = instruction.attributes[attrName] as BindingExpression;
 
-      if (attrExp.constructor.name == "InterpolationBindingExpression")
+      if (attrExp.constructor.name === "InterpolationBindingExpression")
         this.examineInterpolationExpression(node, attrExp);
       else {
-        let access = instruction.attributes[attrName].sourceExpression;
+        let access = attrExp.sourceExpression;
         let chain = this.flattenAccessChain(access);
         let resolved = this.resolveAccessScopeToType(
           node,
