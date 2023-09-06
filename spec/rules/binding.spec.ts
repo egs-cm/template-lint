@@ -153,7 +153,9 @@ describe("Static-Type Binding Tests", () => {
 
       const pageView = `
         <template>
-          <div custom-repeat.for="item of items"></div>
+          <div custom-repeat.for="item of items">
+            \${item}
+          </div>
         </template>
       `
 
