@@ -166,6 +166,26 @@ describe("Static-Type Binding Tests", () => {
       const issues = await linter.lint(pageView, "./page.html")
       expect(issues.length).toBe(0);
     });
+
+    test("support repeat.for over map", async () => {
+      const pageViewModel = `
+      export class Page {
+        items = new Map(["key","value"]);
+      }`;
+
+      const pageView = `
+        <template>
+          <div repeat.for="[key,value] of items"></div>
+        </template>
+      `
+
+      const reflection = new Reflection();
+      const rule = new BindingRule(reflection, new AureliaReflection());
+      const linter = new Linter([rule]);
+      reflection.add("./page.ts", pageViewModel);
+      const issues = await linter.lint(pageView, "./page.html")
+      expect(issues.length).toBe(0);
+    });
   });
 
 

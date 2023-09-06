@@ -163,7 +163,7 @@ export class BindingRule extends ASTBuilder {
     const { attrName, attributes } = instruction;
     const attrLoc = node.location;
 
-    if ("local" in attributes && "items" in attributes) {
+    if ("items" in attributes) {
       const varKey = attributes["key"] as string;
       const varValue = attributes["value"] as string;
       const varLocal = attributes["local"] as string;
