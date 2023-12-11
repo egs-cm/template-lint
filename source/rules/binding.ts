@@ -3,7 +3,7 @@
 import "aurelia-polyfills";
 
 import { BehaviorInstruction } from "aurelia-templating";
-import { NameExpression, ListenerExpression, Expression } from "aurelia-binding";
+import { NameExpression, Expression } from "aurelia-binding";
 import * as ts from "typescript";
 import * as Path from "path";
 
@@ -138,7 +138,7 @@ export class BindingRule extends ASTBuilder {
         break;
       }
       case "ListenerExpression": {
-        this.examineListenerExpression(node, <ListenerExpression>instruction);
+        this.examineListenerExpression(node, instruction.sourceExpression);
         break;
       }
       case "NameExpression": {
@@ -255,18 +255,17 @@ export class BindingRule extends ASTBuilder {
     }
   }
 
-  private examineListenerExpression(node: ASTElementNode, exp: any /*ListenerExpression*/) {
-    let access = exp.sourceExpression;
-    if (access.args === undefined) {
+  private examineListenerExpression(node: ASTElementNode, expression: Expression) {
+    if (!("args" in expression)) {
       this.reportInvalidTypeOfListenerExpression(node.location);
       return;
     }
 
-    let chain = this.flattenAccessChain(access);
+    let chain = this.flattenAccessChain(expression);
     let resolved = this.resolveAccessScopeToType(node, chain, node.location);
 
     node.locals.push(new ASTContext({ name: "$event" }));
-    for (var arg of access.args) {
+    for (var arg of expression.args as Expression[]) {
       let access = arg;
       let chain = this.flattenAccessChain(access);
       let resolved = this.resolveAccessScopeToType(node, chain, node.location);
