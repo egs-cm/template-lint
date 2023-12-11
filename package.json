@@ -43,7 +43,8 @@
     "prebuild": "rimraf dist",
     "build": "tsc --project tsconfig.build.json && resolve-tspaths --src ./source",
     "lint": "tslint source/**/*.ts spec/**/*.ts",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "aurelia-binding": "^2.5.4",
