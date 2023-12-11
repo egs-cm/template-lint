@@ -3,7 +3,7 @@
 import "aurelia-polyfills";
 
 import { BehaviorInstruction } from "aurelia-templating";
-import { NameExpression, Expression } from "aurelia-binding";
+import { NameExpression, Expression, Binary } from "aurelia-binding";
 import * as ts from "typescript";
 import * as Path from "path";
 
@@ -256,6 +256,12 @@ export class BindingRule extends ASTBuilder {
   }
 
   private examineListenerExpression(node: ASTElementNode, expression: Expression) {
+    if (expression instanceof Binary) {
+      [expression.left, expression.right].forEach((expression) =>
+        this.examineListenerExpression(node, expression)
+      );
+      return;
+    }
     if (!("args" in expression)) {
       this.reportInvalidTypeOfListenerExpression(node.location);
       return;

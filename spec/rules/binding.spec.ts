@@ -1376,6 +1376,34 @@ describe("Static-Type Binding Tests", () => {
       });
   });
 
+  it("supports multiple calls in delegate", async () => {
+    let pageViewModel = `
+    export class Page {
+      value:number;
+      public submit() {
+      }
+      public submitOther() {
+      }
+    }`;
+
+    let pageView = `
+    <template>
+      \${value}
+      <form role="form" submit.delegate="submit() || submitOther()"></form>
+      <form role="form" submit.delegate="submt() || submtOther()"></form>
+    </template>`;
+
+    let reflection = new Reflection();
+    let rule = new BindingRule(reflection, new AureliaReflection());
+    let linter = new Linter([rule]);
+    reflection.add("./page.ts", pageViewModel);
+    const issues = await linter.lint(pageView, "./page.html");
+    console.log(issues);
+    expect(issues.length).toBe(2);
+    expect(issues[0].message).toBe("cannot find 'submt' in type 'Page'");
+    expect(issues[1].message).toBe("cannot find 'submtOther' in type 'Page'");
+  });
+
   it("report non-function call in delegate binding", async () => {
     const pageViewModel = `
     export class Page {
