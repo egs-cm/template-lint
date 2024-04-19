@@ -1398,7 +1398,6 @@ describe("Static-Type Binding Tests", () => {
     let linter = new Linter([rule]);
     reflection.add("./page.ts", pageViewModel);
     const issues = await linter.lint(pageView, "./page.html");
-    console.log(issues);
     expect(issues.length).toBe(2);
     expect(issues[0].message).toBe("cannot find 'submt' in type 'Page'");
     expect(issues[1].message).toBe("cannot find 'submtOther' in type 'Page'");
